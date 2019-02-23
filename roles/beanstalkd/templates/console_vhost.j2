@@ -1,0 +1,28 @@
+server {
+    listen {{ beanstalkd.console_vhost_listen_port }};
+    listen [::]:{{ beanstalkd.console_vhost_listen_port }};
+
+    root {{ beanstalkd.console_vhost_base_dir }}/beanstalk_console-master/public;
+    index index.html index.php;
+    server_name {{ beanstalkd.console_vhost_server_name }};
+    charset utf-8;
+
+    set $no_cache 1;
+    expires off;
+
+    access_log off;
+    error_log /var/log/nginx/beanstalk_console.log error;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass {{ beanstalkd.console_vhost_fastcgi_pass }};
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}

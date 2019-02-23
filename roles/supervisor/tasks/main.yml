@@ -1,0 +1,22 @@
+---
+- name: 'Install Supervisor package'
+  apt:
+    name: 'supervisor'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Supervise Maildev'
+  template:
+    src: 'maildev.conf.j2'
+    dest: '/etc/supervisor/conf.d/maildev.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  when: supervisor.maildev.supervise
+  notify: 'restart supervisor'
+
+- name: 'Ensure Supervisor is enabled & running'
+  service:
+    name: 'supervisor'
+    state: 'started'
+    enabled: yes

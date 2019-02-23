@@ -1,0 +1,33 @@
+---
+- name: 'Add Elasticsearch apt key'
+  apt_key:
+    url: '{{ elasticsearch.apt_key }}'
+    state: 'present'
+
+- name: 'Add Elasticsearch repository'
+  apt_repository:
+    repo: 'deb {{ elasticsearch.deb_repo }}'
+    state: 'present'
+    update_cache: yes
+
+- name: 'Install Elasticsearch package'
+  apt:
+    name: 'elasticsearch'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Copy Elasticsearch configuration'
+  template:
+    src: 'elasticsearch.yml.j2'
+    dest: '/etc/elasticsearch/elasticsearch.yml'
+    owner: 'root'
+    group: 'elasticsearch'
+    mode: '0750'
+    backup: yes
+  notify: 'restart elasticsearch'
+
+- name: 'Ensure Elasticsearch is enabled & running'
+  service:
+    name: 'elasticsearch'
+    state: 'started'
+    enabled: yes

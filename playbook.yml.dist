@@ -1,0 +1,17 @@
+---
+- hosts: 'habitat'
+  become: yes
+  vars_files:
+    - 'vars/habitat.yml'
+  roles:
+    - 'common'
+    - 'php'
+    - 'nginx'
+    - 'mysql'
+    - 'redis'
+    - 'memcached'
+    - 'java'
+    - 'elasticsearch'
+    - 'beanstalkd'
+    - 'nodejs'
+    - 'supervisor'

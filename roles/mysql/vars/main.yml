@@ -1,0 +1,25 @@
+---
+mysql:
+  version: '8.0'
+  apt_config_package: 'http://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb'
+  packages:
+    - 'mysql-server'
+    - 'mysql-client'
+    - 'python-mysqldb'
+  root_password: '{{ habitat.mysql.root_password | default("secret") }}'
+  charset: '{{ habitat.mysql.charset | default("utf8mb4") }}'
+  collation: '{{ habitat.mysql.collation | default("utf8mb4_unicode_ci") }}'
+  port: '{{ habitat.mysql.port | default(3306) }}'
+  bind_address: '{{ habitat.mysql.bind_address | default("0.0.0.0") }}'
+  max_connections: '{{ habitat.mysql.max_connections | default(100) }}'
+  connect_timeout: '{{ habitat.mysql.connect_timeout | default(5) }}'
+  wait_timeout: '{{ habitat.mysql.wait_timeout | default(600) }}'
+  max_allowed_packet: '{{ habitat.mysql.max_allowed_packet | default("16M") }}'
+  error_log: '{{ habitat.mysql.error_log | default("/var/log/mysql/error.log") }}'
+  slow_query_log: '{{ habitat.mysql.slow_query_log | default(0) }}'
+  slow_query_log_file: '{{ habitat.mysql.slow_query_log_file | default("/var/log/mysql/slow.log") }}'
+  long_query_time: '{{ habitat.mysql.long_query_time | default(1) }}'
+  remove_anonymous_user: true
+  remove_test_database: true
+  schemas: '{{ habitat.mysql.schemas | default([]) }}'
+  users: '{{ habitat.mysql.users | default([]) }}'

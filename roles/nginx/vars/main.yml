@@ -1,0 +1,19 @@
+---
+nginx:
+  ppa: 'ppa:nginx/stable'
+  user: '{{ habitat.nginx.user | default("www-data") }}'
+  worker_processes: '{{ habitat.nginx.processes | default("auto") }}'
+  worker_connections: '{{ habitat.nginx.connections | default(2048) }}'
+  multi_accept: '{{ habitat.nginx.multi_accept | default("on") }}'
+  disable_default_vhost: '{{ habitat.nginx.disable_default_vhost | default(true) }}'
+  vhost:
+    name: '{{ habitat.nginx.vhost.name | default("acme") }}'
+    listen_port: '{{ habitat.nginx.vhost.listen_port | default(443) }}'
+    server_name: '{{ habitat.nginx.vhost.server_name | default("acme.local") }}'
+    document_root: '{{ habitat.nginx.vhost.document_root | default("/vagrant/acme/public") }}'
+    log_level: '{{ habitat.nginx.vhost.log_level | default("debug") }}'
+    set_no_cache: '{{ habitat.nginx.vhost.set_no_cache | default(1) }}'
+    fastcgi_pass: '{{ habitat.nginx.vhost.fastcgi_pass | default("unix:/run/php/php7.3-fpm.sock") }}'
+    fastcgi_cache_valid_time: '{{ habitat.nginx.vhost.fastcgi_cache_valid_time | default("1d") }}'
+    static_cache_control_header: '{{ habitat.nginx.vhost.static_cache_control_header | default("public, max-age=86400, s-maxage=86400") }}'
+    static_expires: '{{ habitat.nginx.vhost.static_expires | default("off") }}'

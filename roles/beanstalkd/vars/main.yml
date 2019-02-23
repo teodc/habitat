@@ -1,0 +1,14 @@
+---
+beanstalkd:
+  listen_address: '{{ habitat.beanstalkd.listen_address | default("0.0.0.0") }}'
+  listen_port: '{{ habitat.beanstalkd.listen_port | default(11300) }}'
+  persistent_job_storage: '{{ habitat.beanstalkd.persistent_job_storage | default("/var/lib/beanstalkd") }}'
+  maximum_job_size: '{{ habitat.beanstalkd.maximum_job_size | default(262144) }}'
+  install_console: '{{ habitat.beanstalkd.install_console | default(true) }}'
+  console_vhost_server_name: '{{ habitat.beanstalkd.console_vhost_server_name | default("acme.local") }}'
+  console_vhost_listen_port: '{{ habitat.beanstalkd.console_vhost_listen_port | default(7654) }}'
+  console_vhost_base_dir: '{{ habitat.beanstalkd.console_vhost_base_dir | default("/vagrant") }}'
+  console_vhost_fastcgi_pass: '{{ habitat.beanstalkd.console_vhost_fastcgi_pass | default("unix:/run/php/php7.3-fpm.sock") }}'
+  console_auth_enable: '{{ habitat.beanstalkd.console_auth_enable | default (false) }}'
+  console_auth_username: '{{ habitat.beanstalkd.console_auth_username | default("user") }}'
+  console_auth_password: '{{ habitat.beanstalkd.console_auth_password | default("secret") }}'

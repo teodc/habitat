@@ -1,0 +1,5 @@
+---
+memcached:
+  memory: '{{ habitat.memcached.memory | default(128) }}'
+  listen: '{{ habitat.memcached.listen | default("0.0.0.0") }}'
+  port: '{{ habitat.memcached.port | default(11211) }}'

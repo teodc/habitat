@@ -1,0 +1,19 @@
+---
+- name: 'Add Java repository'
+  apt_repository:
+    repo: '{{ java.ppa }}'
+    state: 'present'
+    update_cache: yes
+
+- name: 'Accept Java license'
+  debconf:
+    name: '{{ java.oracle_package }}'
+    question: '{{ java.oracle_license_version }}'
+    value: 'true'
+    vtype: 'select'
+
+- name: 'Install Java package'
+  apt:
+    name: '{{ java.oracle_package }}'
+    state: 'latest'
+    update_cache: yes

@@ -1,0 +1,17 @@
+---
+- set_fact:
+    outer_item: '{{ item }}'
+
+- name: 'Create user'
+  mysql_user:
+    host: '{{ outer_item.host }}'
+    name: '{{ outer_item.name }}'
+    password: '{{ outer_item.password }}'
+    state: 'present'
+    login_user: 'root'
+    login_password: '{{ mysql.root_password }}'
+
+# With MySQL 8, Ansible 2.7 has an issue with setting user privileges using the "mysql_user" module.
+# Instead, we'll use a shell command.
+- name: 'Grant all privileges to user'
+  shell: 'mysql --user="root" --password="{{ mysql.root_password }}" --execute="GRANT {{ outer_item.privileges.grants }} PRIVILEGES ON {{ outer_item.privileges.schema }}.* TO ''{{ outer_item.name }}''@''{{ outer_item.host }}'';"'

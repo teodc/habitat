@@ -1,0 +1,40 @@
+---
+- name: 'Fetch beanstalk_console project'
+  unarchive:
+    src: 'https://github.com/ptrofimov/beanstalk_console/archive/master.zip'
+    dest: '{{ beanstalkd.console_vhost_base_dir }}'
+    copy: 'no'
+    owner: 'root'
+    group: 'www-data'
+    mode: '0755'
+
+- name: 'Copy beanstalk_console configuration'
+  template:
+    src: 'console_config.php.j2'
+    dest: '{{ beanstalkd.console_vhost_base_dir }}/beanstalk_console-master/config.php'
+    owner: 'root'
+    group: 'www-data'
+    mode: '0755'
+    backup: yes
+
+- name: 'Make beanstalk_console storage folder writable'
+  file:
+    path: '{{ beanstalkd.console_vhost_base_dir }}/beanstalk_console-master/storage.json'
+    owner: 'root'
+    group: 'www-data'
+    mode: '0775'
+
+- name: 'Add beanstalk_console Nginx vhost'
+  template:
+    src: 'console_vhost.j2'
+    dest: '/etc/nginx/sites-available/beanstalk_console'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Enable beanstalk_console Nginx vhost'
+  file:
+    src: '/etc/nginx/sites-available/beanstalk_console'
+    dest: '/etc/nginx/sites-enabled/beanstalk_console'
+    state: 'link'
+  notify: 'reload nginx'

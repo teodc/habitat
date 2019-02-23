@@ -1,0 +1,4 @@
+---
+nodejs:
+  repo_url: 'https://deb.nodesource.com/setup_10.x'
+  global_packages: '{{ habitat.nodejs.global_packages | default([]) }}'

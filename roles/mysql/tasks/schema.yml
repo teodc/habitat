@@ -1,0 +1,20 @@
+---
+- set_fact:
+    outer_item: '{{ item }}'
+
+- name: 'Create schema'
+  mysql_db:
+    name: '{{ outer_item.name }}'
+    state: 'present'
+    encoding: '{{ mysql.charset }}'
+    collation: '{{ mysql.collation }}'
+    login_user: 'root'
+    login_password: '{{ mysql.root_password }}'
+
+- name: 'Import init script'
+  mysql_db:
+    name: '{{ outer_item.name }}'
+    state: 'import'
+    target: '/tmp/charset.sql'
+    login_user: 'root'
+    login_password: '{{ mysql.root_password }}'

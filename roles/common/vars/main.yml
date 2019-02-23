@@ -1,0 +1,21 @@
+---
+common:
+  server_hostname: '{{ habitat.common.server_hostname | default("acme") }}'
+  server_timezone: '{{ habitat.common.server_timezone | default("UTC") }}'
+  server_locale: '{{ habitat.common.server_locale | default("en_US.UTF-8") }}'
+  required_packages:
+    - 'curl'
+    - 'wget'
+    - 'tar'
+    - 'vim'
+    - 'unzip'
+    - 'tree'
+    - 'htop'
+    - 'git'
+    - 'sqlite3'
+    - 'language-pack-en-base'
+    - 'build-essential'
+    - 'software-properties-common'
+    - 'python-apt'
+    - 'debconf-utils'
+  extra_packages: '{{ habitat.common.extra_packages | default([]) }}'

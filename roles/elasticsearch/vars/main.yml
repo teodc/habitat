@@ -1,0 +1,8 @@
+---
+elasticsearch:
+  apt_key: 'https://artifacts.elastic.co/GPG-KEY-elasticsearch'
+  deb_repo: 'https://artifacts.elastic.co/packages/6.x/apt stable main'
+  cluster_name: '{{ habitat.elasticsearch.cluster_name | default("acme") }}'
+  node_name: '{{ habitat.elasticsearch.node_name | default("acme-node-1") }}'
+  network_host: '{{ habitat.elasticsearch.network_host | default("0.0.0.0") }}'
+  http_port: '{{ habitat.elasticsearch.http_port | default("9200") }}'

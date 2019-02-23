@@ -1,0 +1,7 @@
+---
+redis:
+  ppa: 'ppa:chris-lea/redis-server'
+  daemonize: '{{ habitat.redis.daemonize | default("yes") }}'
+  bind: '{{ habitat.redis.bind | default("0.0.0.0") }}'
+  port: '{{ habitat.redis.port | default(6379) }}'
+  databases: '{{ habitat.redis.databases | default(10) }}'

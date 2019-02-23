@@ -1,0 +1,12 @@
+[program:maildev]
+process_name = %(program_name)s_%(process_num)02d
+command = maildev --ip {{ supervisor.maildev.ip }} --smtp {{ supervisor.maildev.smtp }} --web {{ supervisor.maildev.web }} --web-ip {{ supervisor.maildev.web_ip }} --web-user {{ supervisor.maildev.web_user }} --web-pass {{ supervisor.maildev.web_password }}
+directory = {{ supervisor.maildev.directory }}
+user = vagrant
+numprocs = {{ supervisor.maildev.numprocs }}
+stdout_logfile = {{ supervisor.maildev.stdout_logfile }}
+stdout_logfile_maxbytes = 50MB
+stdout_logfile_backups = 20
+redirect_stderr = true
+autostart = {{ supervisor.maildev.autostart }}
+autorestart = {{ supervisor.maildev.autostart }}

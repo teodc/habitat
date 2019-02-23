@@ -1,0 +1,126 @@
+---
+- name: 'Register current hostname'
+  shell: 'hostname'
+  register: 'current_hostname'
+
+- name: 'Specify MySQL version preference'
+  shell: 'echo mysql-apt-config mysql-apt-config/select-server select mysql-{{ mysql.version }} | debconf-set-selections'
+
+- name: 'Check if MySQL apt repository package is already installed'
+  command: 'dpkg-query -W mysql-apt-config'
+  register: 'apt_config_package_check'
+  failed_when: apt_config_package_check.rc > 1
+  changed_when: apt_config_package_check.rc == 1
+
+- name: 'Add MySQL apt repository package'
+  apt:
+    deb: '{{ mysql.apt_config_package }}'
+    update-cache: yes
+  when: apt_config_package_check.rc == 1
+
+- name: 'Install MySQL packages'
+  apt:
+    name: '{{ mysql.packages }}'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Copy MySQL configuration'
+  template:
+    src: 'mysql.cnf.j2'
+    dest: '{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+  with_items:
+    - '/etc/mysql/my.cnf'
+    - '/etc/mysql/mysql.cnf'
+  notify: 'restart mysql'
+
+- name: 'Create slow queries log file'
+  file:
+    state: 'touch'
+    path: '{{ mysql.slow_query_log_file }}'
+    owner: 'mysql'
+    group: 'mysql'
+    mode: '0644'
+
+- name: 'Restart MySQL to apply the new configuration'
+  service:
+    name: 'mysql'
+    state: 'restarted'
+
+- name: 'Create root user'
+  mysql_user:
+    host: '{{ item }}'
+    name: root
+    password: '{{ mysql.root_password }}'
+    state: 'present'
+    login_user: root
+    login_password: '{{ mysql.root_password }}'
+  with_items:
+    - '%'
+    - '{{ current_hostname.stdout | lower }}'
+    - '127.0.0.1'
+    - '::1'
+    - 'localhost'
+
+# With MySQL 8, Ansible 2.7 has an issue with setting user privileges using the "mysql_user" module.
+# Instead, we'll use a shell command to do it.
+- name: 'Update root user privileges'
+  shell: 'mysql --user="root" --password="{{ mysql.root_password }}" --execute="GRANT ALL PRIVILEGES ON *.* TO ''root''@''{{ item }}'' WITH GRANT OPTION;"'
+  with_items:
+    - '%'
+    - '{{ current_hostname.stdout | lower }}'
+    - '127.0.0.1'
+    - '::1'
+    - 'localhost'
+
+- name: 'Copy .my.cnf file for the ssh user'
+  template:
+    src: 'my.cnf.j2'
+    dest: '/home/{{ ansible_user }}/.my.cnf'
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+    mode: '0600'
+
+- name: 'Delete anonymous user'
+  mysql_user:
+    host: '{{ item }}'
+    user: ''
+    state: 'absent'
+    login_user: 'root'
+    login_password: '{{ mysql.root_password }}'
+  with_items:
+    - '{{ current_hostname.stdout | lower }}'
+    - '127.0.0.1'
+    - '::1'
+    - 'localhost'
+  when: mysql.remove_anonymous_user
+
+- name: 'Remove test database'
+  mysql_db:
+    db: 'test'
+    state: 'absent'
+    login_user: 'root'
+    login_password: '{{ mysql.root_password }}'
+  when: mysql.remove_test_database
+
+- name: 'Copy init script'
+  copy:
+    src: 'charset.sql'
+    dest: '/tmp'
+
+- name: 'Create schemas'
+  include_tasks: 'schema.yml'
+  with_items: '{{ mysql.schemas }}'
+
+- name: 'Create users'
+  include_tasks: 'user.yml'
+  with_items: '{{ mysql.users }}'
+
+- name: 'Ensure MySQL is enabled & running'
+  service:
+    name: 'mysql'
+    state: started
+    enabled: yes

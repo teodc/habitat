@@ -1,0 +1,84 @@
+---
+- name: 'Update repositories sources'
+  copy:
+    src: 'sources.list'
+    dest: '/etc/apt/'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+
+- name: 'Refresh system packages'
+  apt:
+    update_cache: yes
+
+- name: 'Update system packages'
+  apt:
+    upgrade: 'dist'
+
+- name: 'Set server hostname'
+  hostname:
+    name: '{{ common.server_hostname }}'
+
+- name: 'Update /etc/hosts file'
+  lineinfile:
+    dest: '/etc/hosts'
+    regexp: '^127\.0\.0\.1'
+    line: '127.0.0.1 localhost {{ common.server_hostname }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+
+- name: 'Set server timezone 1/2'
+  timezone:
+    name: '{{ common.server_timezone }}'
+
+- name: 'Set server timezone 2/2'
+  shell: 'dpkg-reconfigure -f noninteractive tzdata'
+
+- name: 'Set server locale 1/3'
+  locale_gen:
+    name: '{{ common.server_locale }}'
+    state: 'present'
+
+- name: 'Set server locale 2/3'
+  shell: 'update-locale {{ item }}={{ common.server_locale }}'
+  with_items:
+    - 'LANG'
+    - 'LANGUAGE'
+    - 'LC_CTYPE'
+    - 'LC_NUMERIC'
+    - 'LC_TIME'
+    - 'LC_COLLATE'
+    - 'LC_MONETARY'
+    - 'LC_MESSAGES'
+    - 'LC_PAPER'
+    - 'LC_NAME'
+    - 'LC_ADDRESS'
+    - 'LC_TELEPHONE'
+    - 'LC_MEASUREMENT'
+    - 'LC_IDENTIFICATION'
+    - 'LC_ALL'
+
+- name: 'Set server locale 3/3'
+  shell: 'dpkg-reconfigure -f noninteractive locales'
+
+- name: 'Install zsh'
+  apt:
+    name: 'zsh'
+    state: 'latest'
+
+- name: 'Set zsh as the default shell'
+  user:
+    name: '{{ item }}'
+    shell: '/bin/zsh'
+  with_items:
+    - '{{ ansible_user }}'
+    - '{{ ansible_become_user }}'
+
+- name: 'Install required & useful packages'
+  apt:
+    name: '{{common.required_packages }} + {{ common.extra_packages }}'
+    state: 'latest'
+    update_cache: yes

@@ -1,0 +1,138 @@
+---
+habitat:
+# ------------------------------------------------------------------------------
+  common:
+    server_hostname: 'acme'
+    server_timezone: 'UTC'
+    server_locale: 'en_US.UTF-8'
+    extra_packages: []
+# ------------------------------------------------------------------------------
+  php:
+    extra_packages: []
+    short_open_tag: 'Off'
+    expose_php: 'Off'
+    max_execution_time: 30
+    max_input_time: 60
+    max_input_nesting_level: 200
+    max_input_vars: 1000
+    memory_limit: '512M'
+    error_reporting: 'E_ALL'
+    display_errors: 'On'
+    display_startup_errors: 'On'
+    post_max_size: '16M'
+    default_mimetype: 'text/html'
+    default_charset: 'UTF-8'
+    upload_max_filesize: '128M'
+    max_file_uploads: 20
+    date_timezone: 'UTC'
+    opcache_enable: 1
+    opcache_memory_consumption: 128
+    opcache_max_accelerated_files: 4000
+    opcache_validate_timestamps: 1
+    opcache_revalidate_freq: 0
+    install_composer: true
+    fpm_user: 'www-data'
+    fpm_group: 'www-data'
+    fpm_listen_owner: 'www-data'
+    fpm_listen_group: 'www-data'
+    fpm_allowed_clients: '127.0.0.1'
+    fpm_pm_type: 'dynamic'
+    fpm_pm_max_children: 10
+    fpm_pm_start_servers: 4
+    fpm_pm_min_spare_servers: 2
+    fpm_pm_max_spare_servers: 6
+    fpm_pm_max_requests: 500
+    fpm_slowlog: '/var/log/php-fpm/$pool.slow.log'
+    fpm_request_slowlog_timeout: 0
+    xdebug_remote_enable: 1
+    xdebug_connect_back: 1
+    xdebug_autostart: 1
+    xdebug_idekey: 'habitat'
+# ------------------------------------------------------------------------------
+  nginx:
+    user: 'www-data'
+    worker_processes: 2
+    worker_connections: 2048
+    multi_accept: 'on'
+    disable_default_vhost: true
+    vhost:
+      name: 'acme'
+      listen_port: '443'
+      server_name: '*.acme.local'
+      document_root: '/vagrant/acme/public'
+      log_level: 'debug'
+      set_no_cache: 1
+      fastcgi_pass: 'unix:/run/php/php7.3-fpm.sock'
+      fastcgi_cache_valid_time: '1d'
+      static_cache_control_header: 'public, max-age=86400, s-maxage=86400'
+      static_expires: 'off'
+# ------------------------------------------------------------------------------
+  mysql:
+    root_password: 'secret'
+    charset: 'utf8mb4'
+    collation: 'utf8mb4_unicode_ci'
+    port: 3306
+    bind_address: '0.0.0.0'
+    max_connections: 100
+    connect_timeout: 5
+    wait_timeout: 600
+    max_allowed_packet: 16M
+    slow_query_log: 0
+    long_query_time: 1
+    remove_anonymous_user: true
+    remove_test_database: true
+    schemas:
+      - name: 'acme'
+    users:
+      - host: '%'
+        name: 'acme_user'
+        password: 'secret'
+        privileges:
+          schema: 'acme'
+          grants: 'ALL'
+# ------------------------------------------------------------------------------
+  redis:
+    bind: '0.0.0.0'
+    daemonize: 'yes'
+    port: 6379
+    databases: 10
+# ------------------------------------------------------------------------------
+  memcached:
+    memory: 128
+    listen: '0.0.0.0'
+    port: 11211
+# ------------------------------------------------------------------------------
+  elasticsearch:
+    cluster_name: 'acme'
+    node_name: 'acme-node-1'
+    network_host: '0.0.0.0'
+    http_port: '9200'
+# ------------------------------------------------------------------------------
+  beanstalkd:
+    listen_address: '0.0.0.0'
+    listen_port: '11300'
+    persistent_job_storage: '/var/lib/beanstalkd'
+    maximum_job_size: 262144
+    install_console: yes
+    console_vhost_server_name: 'acme.local'
+    console_vhost_listen_port: 7654
+    console_vhost_base_dir: '/vagrant'
+    console_vhost_fastcgi_pass: 'unix:/run/php/php7.3-fpm.sock'
+# ------------------------------------------------------------------------------
+  nodejs:
+    global_packages:
+      - 'maildev'
+      - 'webpack'
+      - 'yarn'
+# ------------------------------------------------------------------------------
+  supervisor:
+    maildev:
+      supervise: 'true'
+      autostart: 'true'
+      directory: '/home/vagrant'
+      numprocs: 1
+      stdout_logfile: '/var/log/maildev.log'
+      ip: '0.0.0.0'
+      smtp: 1025
+      web: 1080
+      web_ip: '0.0.0.0'

@@ -1,0 +1,14 @@
+---
+supervisor:
+  maildev:
+    supervise: '{{ habitat.supervisor.maildev.supervise | default(true) }}'
+    autostart: '{{ habitat.supervisor.maildev.autostart | default(true) }}'
+    directory: '{{ habitat.supervisor.maildev.directory | default("/home/vagrant") }}'
+    numprocs: '{{ habitat.supervisor.maildev.numprocs | default(1) }}'
+    stdout_logfile: '{{ habitat.supervisor.maildev.stdout_logfile | default("/var/log/maildev.log") }}'
+    ip: '{{ habitat.supervisor.maildev.ip | default("0.0.0.0") }}'
+    smtp: '{{ habitat.supervisor.maildev.smtp | default(1025) }}'
+    web: '{{ habitat.supervisor.maildev.web | default(1080) }}'
+    web_ip: '{{ habitat.supervisor.maildev.web_ip | default("0.0.0.0") }}'
+    web_user: '{{ habitat.supervisor.maildev.web_user | default("") }}'
+    web_password: '{{ habitat.supervisor.maildev.web_password | default("") }}'

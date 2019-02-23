@@ -1,0 +1,50 @@
+---
+- name: 'Add PHP repository'
+  apt_repository:
+    repo: '{{ php.ppa }}'
+    state: 'present'
+    update_cache: yes
+
+- name: 'Install PHP packages'
+  apt:
+    name: '{{ php.default_packages }} + {{ php.extra_packages }}'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Copy PHP configuration for FPM'
+  template:
+    src: 'fpm.ini.j2'
+    dest: '/etc/php/7.3/fpm/php.ini'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+
+- name: 'Copy PHP configuration for CLI'
+  template:
+    src: 'cli.ini.j2'
+    dest: '/etc/php/7.3/cli/php.ini'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+
+- name: 'Copy PHP-FPM pool configuration'
+  template:
+    src: 'www.conf.j2'
+    dest: '/etc/php/7.3/fpm/pool.d/www.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+  notify: 'restart php-fpm'
+
+- name: 'Ensure PHP-FPM is enabled & running'
+  service:
+    name: 'php7.3-fpm'
+    state: 'started'
+    enabled: yes
+
+- name: 'Install Composer'
+  shell: 'curl -sS https://getcomposer.org/installer | php -- --install-dir={{ php.composer_bin_path | quote }} --filename=composer creates={{ php.composer_bin_path | quote }}/composer'
+  when: php.install_composer

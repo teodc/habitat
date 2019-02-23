@@ -1,0 +1,26 @@
+---
+- name: 'Install Beanstalkd package'
+  apt:
+    name: 'beanstalkd'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Copy Beanstalkd configuration'
+  template:
+    src: 'beanstalkd.j2'
+    dest: '/etc/default/beanstalkd'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+  notify: 'restart beanstalkd'
+
+- name: 'Ensure Beanstalkd is enabled & running'
+  service:
+    name: 'beanstalkd'
+    state: 'started'
+    enabled: yes
+
+- name: 'Install beanstalk_console'
+  include_tasks: 'beanstalk_console.yml'
+  when: beanstalkd.install_console

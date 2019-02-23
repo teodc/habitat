@@ -1,0 +1,73 @@
+---
+- name: 'Add Nginx repository'
+  apt_repository:
+    repo: '{{ nginx.ppa }}'
+    state: 'present'
+    update_cache: yes
+
+- name: 'Install Nginx packages'
+  apt:
+    name: 'nginx'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Copy Nginx configuration'
+  template:
+    src: 'nginx.conf.j2'
+    dest: '/etc/nginx/nginx.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+
+- name: 'Disable default vhost'
+  file:
+    path: '/etc/nginx/sites-enabled/default'
+    state: 'absent'
+  when: nginx.disable_default_vhost
+  notify: 'reload nginx'
+
+- name: 'Create SSL certificates directory'
+  file:
+    path: '/etc/nginx/ssl'
+    state: 'directory'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+
+- name: 'Copy SSL certificates 1/2'
+  copy:
+    src: 'habitat.crt'
+    dest: '/etc/nginx/ssl/{{ nginx.vhost.name }}.crt'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Install SSL certificates 2/2'
+  copy:
+    src: 'habitat.key'
+    dest: '/etc/nginx/ssl/{{ nginx.vhost.name }}.key'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Copy application vhost configuration'
+  template:
+    src: 'vhost.j2'
+    dest: '/etc/nginx/sites-available/{{ nginx.vhost.name }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+- name: 'Enable application vhost'
+  file:
+    src: '/etc/nginx/sites-available/{{ nginx.vhost.name }}'
+    dest: '/etc/nginx/sites-enabled/{{ nginx.vhost.name }}'
+    state: 'link'
+  notify: 'reload nginx'
+
+- name: 'Ensure Nginx is enabled & running'
+  service:
+    name: 'nginx'
+    state: 'started'
+    enabled: yes

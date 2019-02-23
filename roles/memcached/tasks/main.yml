@@ -1,0 +1,22 @@
+---
+- name: 'Install Memcached'
+  apt:
+    name: 'memcached'
+    state: 'latest'
+    update_cache: yes
+
+- name: 'Write Memcached configuration'
+  template:
+    src: 'memcached.conf.j2'
+    dest: '/etc/memcached.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    backup: yes
+  notify: 'restart memcached'
+
+- name: 'Ensure Memcached is enabled & running'
+  service:
+    name: 'memcached'
+    state: 'started'
+    enabled: yes
